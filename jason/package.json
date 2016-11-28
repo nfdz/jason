@@ -1,0 +1,8 @@
+{
+  "name"    : "jason",
+  "version" : "0.0.1",
+  "description": "Desktop application to manage your code snippets.",
+  "main"    : "main.js",
+  "author": "Noé Fernández <noe.fernandez@protonmail.com>",
+  "license": "GPLv3"
+}
