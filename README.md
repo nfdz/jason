@@ -15,9 +15,13 @@ Desktop application to manage your code snippets.
 ## Setup
 
 Create an asar package:
-`asar pack jason jason.asar`
+~~~
+asar pack jason jason.asar
+~~~
 Execute electron framework with jason.asar param:
-`electron jason.asar`
+~~~
+electron jason.asar
+~~~
 
 ## Usage
 
