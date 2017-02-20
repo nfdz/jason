@@ -8,9 +8,6 @@ Desktop application to manage code snippets.
 
 ## Roadmap
 
-Software process model: *Evolutionary Prototyping Process*
-Initial concept → Design and implement initial prototype → Refine prototype until acceptable → Complete and release prototype. The system is continually refined and rebuilt.
-
 I will use sprints to determine the stages of development that I want to follow.
 
 * **Sprint 1**: Create data model, interfaces and mockup UI.
@@ -32,7 +29,7 @@ TODO: Add customized installations according to operating system or linux distri
 ## Usage
 
 * Create a new snippet: File -> New Snippet / Plus button / Ctrl+N
-* View a snippet: Click snippet in left table and snippet information will appear in right area. Using "View" button, snippet will be opened in configured code text editor (for example sublime text, eclipse, etc).
+* View a snippet: Click snippet in left table and snippet information will appear in right area. Using "View" button, snippet will be opened in configured code text editor (for example atom, sublime text, eclipse, etc).
 
 TODO: edit
 
