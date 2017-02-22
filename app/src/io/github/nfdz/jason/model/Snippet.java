@@ -20,88 +20,88 @@ import java.util.List;
  * This POJO class contains all information that defines a snippet.
  */
 public class Snippet {
-	
-	private final String mName;
-	private final String mLanguage;
-	private final String mCode;
-	private final List<String> mTags;
-	private final long mCreationTime; 
-	
-	/**
-	 * Constructor. No field can be null.
-	 * @param name
-	 * @param language
-	 * @param code
-	 * @param tags
-	 * @param creationTime
-	 */
-	public Snippet (String name, String language, String code, List<String> tags, long creationTime) {
-		mName = name;
-		mLanguage = language;
-		mCode = code;
-		mTags = Collections.unmodifiableList(new ArrayList<>(tags));
-		mCreationTime = creationTime;
-	}
+    
+    private final String mName;
+    private final String mLanguage;
+    private final String mCode;
+    private final List<String> mTags;
+    private final long mCreationTime; 
+    
+    /**
+     * Constructor. No field can be null.
+     * @param name
+     * @param language
+     * @param code
+     * @param tags
+     * @param creationTime
+     */
+    public Snippet (String name, String language, String code, List<String> tags, long creationTime) {
+        mName = name;
+        mLanguage = language;
+        mCode = code;
+        mTags = Collections.unmodifiableList(new ArrayList<>(tags));
+        mCreationTime = creationTime;
+    }
 
-	public String getName() {
-		return mName;
-	}
+    public String getName() {
+        return mName;
+    }
 
-	public String getLanguage() {
-		return mLanguage;
-	}
-	
-	public String getCode() {
-		return mCode;
-	}
+    public String getLanguage() {
+        return mLanguage;
+    }
+    
+    public String getCode() {
+        return mCode;
+    }
 
-	public List<String> getTags() {
-		return mTags;
-	}
+    public List<String> getTags() {
+        return mTags;
+    }
 
-	public long getCreationTime() {
-		return mCreationTime;
-	}
+    public long getCreationTime() {
+        return mCreationTime;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (mCode.hashCode());
-		result = prime * result + (int) (mCreationTime ^ (mCreationTime >>> 32));
-		result = prime * result + (mLanguage.hashCode());
-		result = prime * result + (mName.hashCode());
-		result = prime * result + (mTags.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (mCode.hashCode());
+        result = prime * result + (int) (mCreationTime ^ (mCreationTime >>> 32));
+        result = prime * result + (mLanguage.hashCode());
+        result = prime * result + (mName.hashCode());
+        result = prime * result + (mTags.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		
-		Snippet other = (Snippet) obj;
-		if (!mCode.equals(other.mCode))
-			return false;
-		if (mCreationTime != other.mCreationTime)
-			return false;
-		if (!mLanguage.equals(other.mLanguage))
-			return false;
-		if (!mName.equals(other.mName))
-			return false;
-		if (!mTags.equals(other.mTags))
-			return false;
-		return true;
-	}
-	
-	@Override
-	public String toString() {
-		return "{ name=" + mName + 
-				"; language=" + mLanguage +
-				"; tags=" + mTags + 
-				"; creationTime=" + mCreationTime + 
-				" }";
-	}
-	
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        
+        Snippet other = (Snippet) obj;
+        if (!mCode.equals(other.mCode))
+            return false;
+        if (mCreationTime != other.mCreationTime)
+            return false;
+        if (!mLanguage.equals(other.mLanguage))
+            return false;
+        if (!mName.equals(other.mName))
+            return false;
+        if (!mTags.equals(other.mTags))
+            return false;
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        return "{ name=" + mName + 
+                "; language=" + mLanguage +
+                "; tags=" + mTags + 
+                "; creationTime=" + mCreationTime + 
+                " }";
+    }
+    
 }
