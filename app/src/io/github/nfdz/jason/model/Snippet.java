@@ -12,6 +12,7 @@
  */
 package io.github.nfdz.jason.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class Snippet {
 		mName = name;
 		mLanguage = language;
 		mCode = code;
-		mTags = Collections.unmodifiableList(tags);
+		mTags = Collections.unmodifiableList(new ArrayList<>(tags));
 		mCreationTime = creationTime;
 	}
 
@@ -92,6 +93,15 @@ public class Snippet {
 		if (!mTags.equals(other.mTags))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return "{ name=" + mName + 
+				"; language=" + mLanguage +
+				"; tags=" + mTags + 
+				"; creationTime=" + mCreationTime + 
+				" }";
 	}
 	
 }

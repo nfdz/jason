@@ -12,22 +12,50 @@
  */
 package io.github.nfdz.jason.view;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import io.github.nfdz.jason.MainApp;
 import io.github.nfdz.jason.model.Snippet;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /**
  * This class is the controller of the SnippetsOverview view.
  */
 public class SnippetsOverviewController {
+	
+	/** Tag separator used to format tag lists */
+	private final static String TAG_SEPARATOR = ";";
+	
+	// default values when there is no snippet to show
+	private final static String DEFAULT_NAME = "";
+	private final static String DEFAULT_LANGUAGE = "";
+	private final static String DEFAULT_TAGS = "";
+	private final static String DEFAULT_CODE = "";
+	
+	private final static Logger LOGGER = Logger.getLogger(SnippetsOverviewController.class.getName());
 
 	@FXML
     private TableView<Snippet> mSnippetsTable;
@@ -43,25 +71,168 @@ public class SnippetsOverviewController {
     
     @FXML
     private Label mTagsLabel;
-    
+
     @FXML
     private TextArea mCodeText;
+
+    @FXML
+    private Button mRemoveButton;
+    
+    @FXML
+    private Button mEditButton;
+    
+    @FXML
+    private Button mViewButton;
     
     public SnippetsOverviewController() {
     }
 
     @FXML
     private void initialize() {
+    	// initialize table
     	mNameColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Snippet,String>, ObservableValue<String>>() {
 			@Override
 			public ObservableValue<String> call(CellDataFeatures<Snippet, String> param) {
 				return new ReadOnlyObjectWrapper<String>(param.getValue().getName());
 			}
 		});
-    }
+    	
+    	// clear snippet details
+    	showSnippetDetails(null);
 
+    	// add listener of table selection changes
+    	mSnippetsTable.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> showSnippetDetails(newValue));
+    	// clear selection when double click
+    	mSnippetsTable.setOnMouseClicked(
+    			(e) -> { if(e.getClickCount() == 2) mSnippetsTable.getSelectionModel().select(null); });
+    }
+    
+    /**
+     * Inject snippets repository and set it in TableView.
+     * @param repository
+     */
     public void setRepository(ObservableList<Snippet> repository) {
     	mSnippetsTable.setItems(repository);
     }
     
+    /**
+     * Fill all text fields with given snippet information. If snippet is null,
+     * there is no information to show and all fields will contain default value.
+     * @param snippet
+     */
+    private void showSnippetDetails(Snippet snippet) {
+    	LOGGER.fine("Showing snippet: " + snippet);
+    	if (snippet == null) {
+    		mNameLabel.setText(DEFAULT_NAME);
+    		mLanguageLabel.setText(DEFAULT_LANGUAGE);
+    		mTagsLabel.setText(DEFAULT_TAGS);
+    		mCodeText.setText(DEFAULT_CODE);
+    		mRemoveButton.setDisable(true);
+    		mEditButton.setDisable(true);
+    		mViewButton.setDisable(true);
+    	} else {
+    		mNameLabel.setText(snippet.getName());
+    		mLanguageLabel.setText(snippet.getLanguage());
+    		mTagsLabel.setText(formatTagList(snippet.getTags()));
+    		mCodeText.setText(snippet.getCode());
+    		mRemoveButton.setDisable(false);
+    		mEditButton.setDisable(false);
+    		mViewButton.setDisable(false);
+    	}
+    }
+    
+    /**
+     * Format a list of tag in a String.
+     * @param tags
+     * @return String formated tag list
+     */
+    private String formatTagList(List<String> tags) {
+    	StringBuilder txt = new StringBuilder();
+    	Iterator<String> it = tags.iterator();
+    	while (it.hasNext()) {
+    		String tag = it.next();
+    		txt.append(tag);
+    		if (it.hasNext()) txt.append(TAG_SEPARATOR + " ");
+    	}
+    	return txt.toString();
+    }
+    
+    /**
+     * This method is called when user click remove button.
+     */
+    @FXML
+    private void handleRemoveSnippet() {
+    	int selectedIndex = mSnippetsTable.getSelectionModel().getSelectedIndex();
+    	if (selectedIndex < 0) return;
+        Snippet snippet = mSnippetsTable.getItems().get(selectedIndex);
+    	
+    	// ask confirmation
+    	Alert alert = new Alert(AlertType.CONFIRMATION);
+    	alert.setTitle(MainApp.APP_TITLE + " - Confirmation Remove Snippet");
+    	alert.setHeaderText("Are you sure you want to remove this snippet?");
+    	alert.setContentText(snippet.getName());
+
+    	Optional<ButtonType> result = alert.showAndWait();
+    	if (result.get() == ButtonType.OK){
+    	    // user chose OK
+        	LOGGER.fine("Removed snippet: " + snippet.getName());
+            mSnippetsTable.getItems().remove(snippet);
+    	} else {
+    	    // user chose CANCEL or closed the dialog
+    	}
+    	
+    }
+
+    /**
+     * This method is called when user click edit button.
+     */
+    @FXML
+    private void handleEditSnippet() {
+    	int selectedIndex = mSnippetsTable.getSelectionModel().getSelectedIndex();
+    	if (selectedIndex < 0) return;
+        Snippet snippet = mSnippetsTable.getItems().get(selectedIndex);
+        
+        Snippet editedSnippet = showSnippetEditDialog(snippet);
+        
+        if (editedSnippet != null) {
+        	LOGGER.fine("Edited snippet: " + snippet.getName());
+            mSnippetsTable.getItems().remove(snippet);
+            mSnippetsTable.getItems().add(editedSnippet);
+            mSnippetsTable.getSelectionModel().select(editedSnippet);
+        }
+    }
+    
+    /**
+     * Open a snippet edit dialog
+     * @param snippet
+     * @return Edited snippet or null if there is no edition
+     */
+    private Snippet showSnippetEditDialog(Snippet snippet) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("SnippetEditDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(MainApp.APP_TITLE + " - Edit Snippet");
+            dialogStage.setMinHeight(page.getMinHeight());
+            dialogStage.setMinWidth(page.getMinWidth());
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(mEditButton.getScene().getWindow());
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            SnippetEditDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setSnippet(snippet);
+
+            dialogStage.showAndWait();
+
+            return controller.getEditedSnippet();
+        } catch (IOException e) {
+        	LOGGER.log(Level.SEVERE, "Can not open snippet edit dialog layout file.", e);
+            return null;
+        }
+    }
 }

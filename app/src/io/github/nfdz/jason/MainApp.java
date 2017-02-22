@@ -13,6 +13,9 @@
 package io.github.nfdz.jason;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import io.github.nfdz.jason.model.Snippet;
 import io.github.nfdz.jason.view.SnippetsOverviewController;
@@ -30,9 +33,9 @@ import javafx.stage.Stage;
  */
 public class MainApp extends Application {
 	
-	private static final String APP_TITLE = "JasonSnippets";
-	private static final int MIN_WIDTH = 700;
-	private static final int MIN_HEIGHT = 400;
+	public static final String APP_TITLE = "JasonSnippets";
+	
+	private final static Logger LOGGER = Logger.getLogger(MainApp.class.getName());
 	
 	private final ObservableList<Snippet> mRepository = FXCollections.observableArrayList();;
 	
@@ -44,12 +47,19 @@ public class MainApp extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) {
+		LOGGER.info("Starting application");
 		
 		mPrimaryStage = primaryStage;
 		mPrimaryStage.setTitle(APP_TITLE);
 
         initRootLayout();
         showSnippetsOverview();
+	}
+	
+	@Override
+	public void stop() throws Exception {
+		LOGGER.info("Stopping application");
+		super.stop();
 	}
 	
 	public void initRootLayout() {
@@ -60,11 +70,11 @@ public class MainApp extends Application {
 
             Scene scene = new Scene(mRootLayout);
             mPrimaryStage.setScene(scene);
-            mPrimaryStage.setMinHeight(MIN_HEIGHT);
-            mPrimaryStage.setMinWidth(MIN_WIDTH);
+            mPrimaryStage.setMinHeight(mRootLayout.getMinHeight());
+            mPrimaryStage.setMinWidth(mRootLayout.getMinWidth());
             mPrimaryStage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+        	LOGGER.log(Level.SEVERE, "Can not open root layout file.", e);
         }
     }
 	
@@ -77,9 +87,9 @@ public class MainApp extends Application {
             mRootLayout.setCenter(snippetsOverview);
             
             SnippetsOverviewController controller = loader.getController();
-            controller.setRepository(mRepository);            
+            controller.setRepository(mRepository);
         } catch (IOException e) {
-            e.printStackTrace();
+        	LOGGER.log(Level.SEVERE, "Can not open snippets overview layout file.", e);
         }
     }
 	
