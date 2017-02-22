@@ -16,11 +16,13 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.github.nfdz.jason.MainApp;
 import io.github.nfdz.jason.model.Snippet;
+import io.github.nfdz.jason.view.SnippetDialogController.OpenMode;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -46,6 +48,11 @@ import javafx.util.Callback;
  */
 public class SnippetsOverviewController {
 	
+	/** Interface of a listener that wants to know what snippet is showing */
+	public static interface IOverviewListener {
+		void selectedSnippet(Snippet snippet);
+	}
+	
 	/** Tag separator used to format tag lists */
 	private final static String TAG_SEPARATOR = ";";
 	
@@ -56,6 +63,8 @@ public class SnippetsOverviewController {
 	private final static String DEFAULT_CODE = "";
 	
 	private final static Logger LOGGER = Logger.getLogger(SnippetsOverviewController.class.getName());
+	
+	private final List<IOverviewListener> mListeners;
 
 	@FXML
     private TableView<Snippet> mSnippetsTable;
@@ -85,6 +94,7 @@ public class SnippetsOverviewController {
     private Button mViewButton;
     
     public SnippetsOverviewController() {
+    	mListeners = new CopyOnWriteArrayList<>();
     }
 
     @FXML
@@ -102,7 +112,7 @@ public class SnippetsOverviewController {
 
     	// add listener of table selection changes
     	mSnippetsTable.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> showSnippetDetails(newValue));
+                (observable, oldValue, newValue) -> { showSnippetDetails(newValue); notifyListeners(newValue);}); 
     	// clear selection when double click
     	mSnippetsTable.setOnMouseClicked(
     			(e) -> { if(e.getClickCount() == 2) mSnippetsTable.getSelectionModel().select(null); });
@@ -211,7 +221,7 @@ public class SnippetsOverviewController {
     private Snippet showSnippetEditDialog(Snippet snippet) {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("SnippetEditDialog.fxml"));
+            loader.setLocation(getClass().getResource("SnippetDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             Stage dialogStage = new Stage();
@@ -223,16 +233,40 @@ public class SnippetsOverviewController {
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 
-            SnippetEditDialogController controller = loader.getController();
+            SnippetDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
+            controller.setOpenMode(OpenMode.EDITION);
             controller.setSnippet(snippet);
 
             dialogStage.showAndWait();
 
-            return controller.getEditedSnippet();
+            return controller.getSnippet();
         } catch (IOException e) {
         	LOGGER.log(Level.SEVERE, "Can not open snippet edit dialog layout file.", e);
             return null;
         }
+    }
+    
+    private void notifyListeners(Snippet snippet) {
+    	for (IOverviewListener listener : mListeners) {
+    		listener.selectedSnippet(snippet);
+    	}
+    }
+    
+    /** Register a listener. It does not ensure first notification. */
+    public void addListener(IOverviewListener listener) {
+    	mListeners.add(listener);
+    }
+    
+    public void removeListener(IOverviewListener listener) {
+    	mListeners.remove(listener);
+    }
+    
+    /**
+     * Select given snippet in the view.
+     * @param snippet or null (clear selection)
+     */
+    public void selectSnippet(Snippet snippet) {
+        mSnippetsTable.getSelectionModel().select(snippet);
     }
 }

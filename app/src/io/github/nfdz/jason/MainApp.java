@@ -19,7 +19,9 @@ import java.util.logging.Logger;
 
 import io.github.nfdz.jason.model.Snippet;
 import io.github.nfdz.jason.view.SnippetsOverviewController;
+import io.github.nfdz.jason.view.SnippetsOverviewController.IOverviewListener;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -27,6 +29,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+// TODO: Persistencia en google drive y github. Por defecto sistema de ficheros.
 
 /**
  * Main application class.
@@ -38,11 +42,14 @@ public class MainApp extends Application {
 	private final static Logger LOGGER = Logger.getLogger(MainApp.class.getName());
 	
 	private final ObservableList<Snippet> mRepository = FXCollections.observableArrayList();;
-	
+
+    private final InternalListener mInternalListener;
+    
     private Stage mPrimaryStage;
     private BorderPane mRootLayout;
     
     public MainApp() {
+    	mInternalListener = new InternalListener();
     }
 	
 	@Override
@@ -53,7 +60,11 @@ public class MainApp extends Application {
 		mPrimaryStage.setTitle(APP_TITLE);
 
         initRootLayout();
-        showSnippetsOverview();
+        SnippetsOverviewController controller = showSnippetsOverview();
+        controller.setRepository(mRepository);
+        controller.addListener(mInternalListener);
+        loadRepository();
+        viewLastSnippet(controller);
 	}
 	
 	@Override
@@ -62,7 +73,7 @@ public class MainApp extends Application {
 		super.stop();
 	}
 	
-	public void initRootLayout() {
+	private void initRootLayout() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
@@ -75,25 +86,54 @@ public class MainApp extends Application {
             mPrimaryStage.show();
         } catch (IOException e) {
         	LOGGER.log(Level.SEVERE, "Can not open root layout file.", e);
+        	Platform.exit();
         }
     }
 	
-	public void showSnippetsOverview() {
+	private SnippetsOverviewController showSnippetsOverview() {
+		SnippetsOverviewController controller = null;
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/SnippetsOverview.fxml"));
             AnchorPane snippetsOverview = (AnchorPane) loader.load();
-
             mRootLayout.setCenter(snippetsOverview);
+            controller = loader.getController();
             
-            SnippetsOverviewController controller = loader.getController();
-            controller.setRepository(mRepository);
+            mRepository.add(new Snippet("aaaa1", "qqwerqwe", "qwer; qwer  ; qwerqwe", new ArrayList<>(),234234324));
+            mRepository.add(new Snippet("bbbb2", "aasdfasdf", "qwer; qwer  ; qwerqwe", new ArrayList<>(),234234324));
+            
         } catch (IOException e) {
         	LOGGER.log(Level.SEVERE, "Can not open snippets overview layout file.", e);
+        	Platform.exit();
         }
+        return controller;
     }
+	
+	private void loadRepository() {
+		// TODO use persistence service
+		
+	}
+	
+	private void viewLastSnippet(SnippetsOverviewController controller) {
+		Snippet lastSelectedSnippet = null;
+		int hashCode = PreferencesUtils.getSelectedSnippetHashCode();
+		for (Snippet snippet : mRepository) {
+			if (snippet.hashCode() == hashCode) {
+				lastSelectedSnippet = snippet;
+				break;
+			}
+		}
+		controller.selectSnippet(lastSelectedSnippet);
+	}
 	
 	public static void main(String[] args) {
 		launch(args);
+	}
+	
+	private class InternalListener implements IOverviewListener {
+		@Override
+		public void selectedSnippet(Snippet snippet) {
+			PreferencesUtils.setSelectedSnippetHashCode(snippet != null ? snippet.hashCode() : -1);
+		}
 	}
 }

@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane minHeight="300.0" minWidth="400.0" prefHeight="350.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nfdz.jason.view.SnippetEditDialogController">
+<AnchorPane minHeight="300.0" minWidth="400.0" prefHeight="350.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.github.nfdz.jason.view.SnippetDialogController">
    <children>
       <GridPane layoutX="43.0" layoutY="67.0" maxHeight="99.0" maxWidth="1.7976931348623157E308" minHeight="75.0" minWidth="200.0" prefHeight="99.0" prefWidth="470.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
         <columnConstraints>
@@ -71,7 +71,7 @@
                         <Insets right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button maxWidth="80.0" minWidth="80.0" mnemonicParsing="false" onAction="#handleEdit" prefWidth="80.0" text="Edit">
+                  <Button fx:id="mFinishButton" maxWidth="80.0" minWidth="80.0" mnemonicParsing="false" onAction="#handleFinish" prefWidth="80.0" text="Finish">
                      <HBox.margin>
                         <Insets right="5.0" />
                      </HBox.margin>

@@ -22,14 +22,18 @@ import io.github.nfdz.jason.model.Snippet;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * This class is the controller of the SnippetEditDialog view.
+ * This class is the controller of the SnippetDialog view.
  */
-public class SnippetEditDialogController {
+public class SnippetDialogController {
+	
+	/** This is the flag used to know what kind of dialog it is */
+	public static enum OpenMode { CREATION, EDITION };
 	
 	/** Tag separator expected and used to show tag list */ 
 	private final static String TAG_SEPARATOR = ";";
@@ -46,10 +50,13 @@ public class SnippetEditDialogController {
 	@FXML
 	private TextArea mCodeArea;
 	
+	@FXML
+	private Button mFinishButton;
+	
 	private Stage mDialogStage;
 	
-	private Snippet mEditedSnippet = null;
-	 
+	private Snippet mSnippet = null;
+		 
 	@FXML
     private void initialize() {
         mTagsField.setPromptText("Use " + TAG_SEPARATOR + " to separate tags");
@@ -63,6 +70,21 @@ public class SnippetEditDialogController {
 	public void setDialogStage(Stage dialogStage) {
 		mDialogStage = dialogStage;
     }
+	
+	/**
+	 * Set dialog open mode. It changes button and dialog texts.
+	 * @param mode
+	 */
+	public void setOpenMode(OpenMode mode) {
+		switch(mode) {
+			case CREATION:
+				mFinishButton.setText("Create");
+				break;
+			case EDITION:
+				mFinishButton.setText("Edit");
+				break;
+		}
+	}
 	
 	/**
 	 * Set snippet to edit. It is used to fill all snippet fields.
@@ -96,15 +118,15 @@ public class SnippetEditDialogController {
 	 * no edited snippet.
 	 * @return Snippet or null
 	 */
-	public Snippet getEditedSnippet() {
-        return mEditedSnippet;
+	public Snippet getSnippet() {
+        return mSnippet;
     }
 	
 	@FXML
-    private void handleEdit() {
+    private void handleFinish() {
         if (isInputValid()) {
         	LocalDate now = LocalDate.now();
-        	mEditedSnippet = new Snippet(mNameField.getText(),
+        	mSnippet = new Snippet(mNameField.getText(),
         			mLanguageField.getText(),
         			mCodeArea.getText(),
         			parseTags(mTagsField.getText()),
@@ -151,7 +173,7 @@ public class SnippetEditDialogController {
         }
         
         if (mCodeArea.getText() == null || mCodeArea.getText().length() == 0) {
-        	msg.append(" Code field can not be empty."); 
+        	msg.append(" Code text can not be empty."); 
         }
 
         if (msg.length() == 0) {
