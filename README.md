@@ -1,5 +1,7 @@
 # JasonSnippets
 
+![Logo](dev/logo.png)
+
 Desktop application to manage code snippets.
 
 ## Mockup
