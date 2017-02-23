@@ -1,6 +1,10 @@
 # JasonSnippets
 
+<p align="center">
 ![Logo](dev/logo.png)
+  <img />
+</p>
+
 
 Desktop application to manage code snippets.
 
