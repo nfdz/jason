@@ -1,8 +1,7 @@
 # JasonSnippets
 
 <p align="center">
-![Logo](dev/logo.png)
-  <img />
+  <img src="dev/logo.png?raw=true" alt="Jason Snippets"/>
 </p>
 
 
