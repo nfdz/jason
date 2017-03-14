@@ -21,11 +21,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.github.nfdz.jason.MainApp;
+import io.github.nfdz.jason.SnippetsRepository;
+import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
 import io.github.nfdz.jason.model.Snippet;
 import io.github.nfdz.jason.view.SnippetDialogController.OpenMode;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -66,7 +68,7 @@ public class SnippetsOverviewController {
     
     private final List<IOverviewListener> mListeners;
     
-    private ObservableList<Snippet> mRepository;
+    private SnippetsRepository mRepository;
 
     @FXML
     private TableView<Snippet> mSnippetsTable;
@@ -124,9 +126,9 @@ public class SnippetsOverviewController {
      * Inject snippets repository and set it in TableView.
      * @param repository
      */
-    public void setRepository(ObservableList<Snippet> repository) {
+    public void setRepository(SnippetsRepository repository) {
         mRepository = repository;
-        mSnippetsTable.setItems(mRepository);
+        mSnippetsTable.setItems(mRepository.getReadableList());
     }
     
     /**
@@ -190,7 +192,25 @@ public class SnippetsOverviewController {
         if (result.get() == ButtonType.OK){
             // user chose OK
             LOGGER.fine("Removed snippet: " + snippet.getName());
-            mSnippetsTable.getItems().remove(snippet);
+            mRepository.removeSnippet(snippet, new IOperationCallback() {
+                @Override
+                public void notifySuccess() {
+                    // nothing to do
+                }
+                @Override
+                public void notifyFailure(String cause) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Alert alert = new Alert(AlertType.ERROR);
+                            alert.setTitle(MainApp.APP_TITLE + " - Remove Snippet Error");
+                            alert.setHeaderText("There was an error removing snippet");
+                            alert.setContentText(cause);
+                            alert.showAndWait();
+                        }
+                     });
+                }
+            });
         } else {
             // user chose CANCEL or closed the dialog
         }
@@ -199,6 +219,11 @@ public class SnippetsOverviewController {
     
     @FXML
     private void handleNewSnippet() {
+        Snippet noSnippet = null;
+        handleNewSnippet(noSnippet);
+    }
+    
+    private void handleNewSnippet(Snippet newSnippet) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("SnippetDialog.fxml"));
@@ -216,12 +241,32 @@ public class SnippetsOverviewController {
             SnippetDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
             controller.setOpenMode(OpenMode.CREATION);
+            if (newSnippet != null) controller.setSnippet(newSnippet);
             dialogStage.showAndWait();
             
             Snippet snippet = controller.getSnippet();
             
             if (snippet != null) {
-                mRepository.add(snippet);
+                mRepository.addSnippet(snippet, new IOperationCallback() {
+                    @Override
+                    public void notifySuccess() {
+                        // nothing to do
+                    }
+                    @Override
+                    public void notifyFailure(String cause) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                Alert alert = new Alert(AlertType.ERROR);
+                                alert.setTitle(MainApp.APP_TITLE + " - New Snippet Error");
+                                alert.setHeaderText("There was an error creating new snippet");
+                                alert.setContentText(cause);
+                                alert.showAndWait();
+                                handleNewSnippet(snippet);
+                            }
+                         });
+                    }
+                });
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Can not open new snippet dialog layout file.", e);
@@ -231,7 +276,7 @@ public class SnippetsOverviewController {
 
     @FXML
     private void handleViewSnippet() {
-        // TODO
+        // TODO implement this
     }
 
     /**
@@ -241,15 +286,46 @@ public class SnippetsOverviewController {
     private void handleEditSnippet() {
         int selectedIndex = mSnippetsTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex < 0) return;
-        Snippet snippet = mSnippetsTable.getItems().get(selectedIndex);
+        Snippet original = mSnippetsTable.getItems().get(selectedIndex);
+        Snippet noEdited = null;
+        handleEditSnippet(original, noEdited);
+    }
+    
+    private void handleEditSnippet(Snippet original, Snippet oldEdited) {
+        Snippet edited;
+        if (oldEdited != null) {
+            edited = showSnippetEditDialog(oldEdited);
+        } else {
+            edited = showSnippetEditDialog(original);
+        }
         
-        Snippet editedSnippet = showSnippetEditDialog(snippet);
-        
-        if (editedSnippet != null) {
-            LOGGER.fine("Edited snippet: " + snippet.getName());
-            mSnippetsTable.getItems().remove(snippet);
-            mSnippetsTable.getItems().add(editedSnippet);
-            mSnippetsTable.getSelectionModel().select(editedSnippet);
+        if (edited != null && !edited.equals(original)) {
+            LOGGER.fine("Edited snippet: " + edited.getName());
+            mRepository.editSnippet(original, edited, new IOperationCallback() {
+                @Override
+                public void notifySuccess() {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSnippetsTable.getSelectionModel().select(edited);
+                        }
+                    });
+                }
+                @Override
+                public void notifyFailure(String cause) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Alert alert = new Alert(AlertType.ERROR);
+                            alert.setTitle(MainApp.APP_TITLE + " - Edit Snippet Error");
+                            alert.setHeaderText("There was an error editing snippet");
+                            alert.setContentText(cause);
+                            alert.showAndWait();
+                            handleEditSnippet(original, edited);
+                        }
+                     });
+                }
+            });
         }
     }
     

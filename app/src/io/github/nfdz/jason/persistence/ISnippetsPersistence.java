@@ -12,9 +12,59 @@
  */
 package io.github.nfdz.jason.persistence;
 
+import java.util.Set;
+
+import io.github.nfdz.jason.model.Snippet;
+
 /**
  * This interface has methods needed to manage snippets persistence tasks.
  */
 public interface ISnippetsPersistence {
-
+    
+    /**
+     * Performs initialization operations.
+     * @throws PersistenceException
+     */
+    void initPersistence() throws PersistenceException;
+    
+    /**
+     * Inserts given snippet.
+     * @param snippet
+     * @throws PersistenceException
+     */
+    void insert(Snippet snippet) throws PersistenceException;
+    
+    /**
+     * Edits a snippet.
+     * @param original snippet
+     * @param edited snippet
+     * @throws PersistenceException
+     */
+    void edit(Snippet original, Snippet edited) throws PersistenceException;
+    
+    /**
+     * Removes given snippet.
+     * @param snippet
+     * @throws PersistenceException
+     */
+    void remove(Snippet snippet) throws PersistenceException;
+    
+    /**
+     * Gets all snippets stored in persistence.
+     * @return Set of Snippet
+     * @throws PersistenceException
+     */
+    Set<Snippet> getSnippets() throws PersistenceException;;
+    
+    /**
+     * Registers given changes listener.
+     * @param listener
+     */
+    void addListener(IChangesListener listener);
+    
+    /**
+     * Unregisters given changes listener.
+     * @param listener
+     */
+    void removeListener(IChangesListener listener);
 }

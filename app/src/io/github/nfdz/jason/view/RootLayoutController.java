@@ -17,10 +17,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.github.nfdz.jason.MainApp;
+import io.github.nfdz.jason.SnippetsRepository;
+import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
 import io.github.nfdz.jason.model.Snippet;
 import io.github.nfdz.jason.view.SnippetDialogController.OpenMode;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -37,13 +38,13 @@ public class RootLayoutController {
     
     private final static Logger LOGGER = Logger.getLogger(RootLayoutController.class.getName());
     
-    private ObservableList<Snippet> mRepository;
+    private SnippetsRepository mRepository;
     
     /**
      * Inject snippets repository.
      * @param repository
      */
-    public void setRepository(ObservableList<Snippet> repository) {
+    public void setRepository(SnippetsRepository repository) {
         mRepository = repository;
     }
 
@@ -52,6 +53,11 @@ public class RootLayoutController {
      */
     @FXML
     public void handleNewSnippet() {
+        Snippet noSnippet = null;
+        handleNewSnippet(noSnippet);
+    }
+    
+    private void handleNewSnippet(Snippet newSnippet) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("SnippetDialog.fxml"));
@@ -68,12 +74,32 @@ public class RootLayoutController {
             SnippetDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
             controller.setOpenMode(OpenMode.CREATION);
+            if (newSnippet != null) controller.setSnippet(newSnippet);
             dialogStage.showAndWait();
             
             Snippet snippet = controller.getSnippet();
             
             if (snippet != null) {
-                mRepository.add(snippet);
+                mRepository.addSnippet(snippet, new IOperationCallback() {
+                    @Override
+                    public void notifySuccess() {
+                        // nothing to do
+                    }
+                    @Override
+                    public void notifyFailure(String cause) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                Alert alert = new Alert(AlertType.ERROR);
+                                alert.setTitle(MainApp.APP_TITLE + " - New Snippet Error");
+                                alert.setHeaderText("There was an error creating new snippet");
+                                alert.setContentText(cause);
+                                alert.showAndWait();
+                                handleNewSnippet(snippet);
+                            }
+                         });
+                    }
+                });
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Can not open new snippet dialog layout file.", e);
@@ -85,7 +111,7 @@ public class RootLayoutController {
      */
     @FXML
     public void handlePreferences() {
-        // TODO
+        // TODO implement this
     }
     
     /**

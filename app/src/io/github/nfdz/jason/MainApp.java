@@ -16,61 +16,73 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
 import io.github.nfdz.jason.model.Snippet;
+import io.github.nfdz.jason.persistence.DummyPersistence;
+import io.github.nfdz.jason.persistence.ISnippetsPersistence;
 import io.github.nfdz.jason.view.RootLayoutController;
 import io.github.nfdz.jason.view.SnippetsOverviewController;
 import io.github.nfdz.jason.view.SnippetsOverviewController.IOverviewListener;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-// TODO: Persistencia en google drive y github. Por defecto sistema de ficheros.
+// TODO Persistence: google drive and github.
 
 /**
  * Main application class.
  */
 public class MainApp extends Application {
-    
-    public static final String APP_TITLE = "JasonSnippets";
-    
+
+    public final static String APP_TITLE = "JasonSnippets";
     private final static Logger LOGGER = Logger.getLogger(MainApp.class.getName());
-    
-    private final ObservableList<Snippet> mRepository = FXCollections.observableArrayList();
 
     private final InternalListener mInternalListener;
     
+    private SnippetsRepository mRepository;
+    private ISnippetsPersistence mPersistence;
+
     private Stage mPrimaryStage;
     private BorderPane mRootLayout;
-    
+
     public MainApp() {
         mInternalListener = new InternalListener();
     }
-    
+
     @Override
     public void start(Stage primaryStage) {
         LOGGER.info("Starting application");
+
+        mPersistence = resolvePersistence();
+        mRepository = new SnippetsRepository(mPersistence);
         
         mPrimaryStage = primaryStage;
         mPrimaryStage.setTitle(APP_TITLE);
+        mPrimaryStage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
 
         initRootLayout();
         SnippetsOverviewController controller = showSnippetsOverview();
-        loadRepository();
-        viewLastSnippet(controller);
+        initRepository(controller);
     }
-    
+
     @Override
     public void stop() throws Exception {
         LOGGER.info("Stopping application");
+        mRepository.stop();
         super.stop();
+        System.exit(0);
     }
     
+    private ISnippetsPersistence resolvePersistence() {
+        // TODO remove dummy implementation
+        return new DummyPersistence();
+    }
+
     private void initRootLayout() {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -89,7 +101,7 @@ public class MainApp extends Application {
             Platform.exit();
         }
     }
-    
+
     private SnippetsOverviewController showSnippetsOverview() {
         SnippetsOverviewController controller = null;
         try {
@@ -99,23 +111,37 @@ public class MainApp extends Application {
             mRootLayout.setCenter(snippetsOverview);
             controller = loader.getController();
             controller.setRepository(mRepository);
-            controller.addListener(mInternalListener);            
+            controller.addListener(mInternalListener);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Can not open snippets overview layout file.", e);
             Platform.exit();
         }
         return controller;
     }
-    
-    private void loadRepository() {
-        // TODO use persistence service
-        
+
+    private void initRepository(SnippetsOverviewController controller) {
+        mRepository.start(new IOperationCallback() {
+            @Override
+            public void notifySuccess() {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        viewLastSnippet(controller);
+                    }
+                });
+            }
+            @Override
+            public void notifyFailure(String cause) {
+                LOGGER.log(Level.SEVERE, "Can not initialize snippets repository. " + cause);
+                Platform.exit();
+            }
+        });
     }
-    
+
     private void viewLastSnippet(SnippetsOverviewController controller) {
         Snippet lastSelectedSnippet = null;
         int hashCode = PreferencesUtils.getSelectedSnippetHashCode();
-        for (Snippet snippet : mRepository) {
+        for (Snippet snippet : mRepository.getReadableList()) {
             if (snippet.hashCode() == hashCode) {
                 lastSelectedSnippet = snippet;
                 break;
@@ -123,11 +149,11 @@ public class MainApp extends Application {
         }
         controller.selectSnippet(lastSelectedSnippet);
     }
-    
+
     public static void main(String[] args) {
         launch(args);
     }
-    
+
     private class InternalListener implements IOverviewListener {
         @Override
         public void selectedSnippet(Snippet snippet) {
