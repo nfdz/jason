@@ -9,23 +9,30 @@ Desktop application to manage code snippets.
 
 ## Mockup
 
-![Mockup](dev/mockup.png)
+<p align="center">
+  <img src="dev/mockup.png?raw=true" alt="Mockup"/>
+</p>
 
 ## Current State
 
-![Jason Snippets](dev/jasonsnippets.png)
-![Snippet Dialog](dev/snippetdialog.png)
+<p align="center">
+  <img src="dev/jasonsnippets.png?raw=true" alt="Jason Snippets"/>
+</p>
+<p align="center">
+  <img src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
+</p>
 
 ## Roadmap
 
 I will use sprints to determine the stages of development that I want to follow.
 
-* **Sprint 1**: Create data model, interfaces and mockup UI.
-* **Sprint 2**: Develop the presentation of the application until it is usable.
-* **Sprint 3**: Create complete data model. Add tagging system.
-* **Sprint 4**: Create an extensible persistence system (connectors approach).
-* **Sprint 5**: Implement search system (name, language and tag based).
-* **Sprint 6**: Implement other features (font resize, themes, etc).
+* ~~**Sprint 1**: Create data model, interfaces and mockup UI.~~
+* ~~**Sprint 2**: Develop the presentation of the application until it is usable.~~
+* ~~**Sprint 3**: Create complete data model. Add tagging system.~~
+* ~~**Sprint 4**: Implement search system (name, language and tag based).~~
+* **Sprint 5**: Implement configuration/user preferences.
+* **Sprint 6**: Create an extensible persistence system (connectors approach).
+* **Sprint 7**: Implement other features (snippet multi-tabs, font resize, themes, etc).
 
 ## Setup
 

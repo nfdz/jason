@@ -62,6 +62,8 @@ public class SnippetsOverviewController {
     /** Interface of a listener that wants to know what snippet is showing */
     public static interface IOverviewListener {
         void selectedSnippet(Snippet snippet);
+        void selectedFilter(String filter);
+        void selectedSort(SortType sort);
     }
     
     /** Tag separator used to format tag lists */
@@ -142,7 +144,7 @@ public class SnippetsOverviewController {
 
         // add listener of table selection changes
         mSnippetsTable.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> { showSnippetDetails(newValue); notifyListeners(newValue);}); 
+                (observable, oldValue, newValue) -> { showSnippetDetails(newValue); notifySelectedSnippet(newValue);}); 
         // clear selection when double click
         mSnippetsTable.setOnMouseClicked(
                 (e) -> { if(e.getClickCount() == 2) mSnippetsTable.getSelectionModel().select(null); });  
@@ -169,6 +171,7 @@ public class SnippetsOverviewController {
                     }
                     return false; // does not match
                 });
+                notifySelectedFilter(newValue);
             }
         });
         
@@ -191,6 +194,7 @@ public class SnippetsOverviewController {
                         default:
                             
                     }
+                    notifySelectedSort(sort);
                 }
             }    
         });
@@ -438,10 +442,22 @@ public class SnippetsOverviewController {
             return null;
         }
     }
-    
-    private void notifyListeners(Snippet snippet) {
+
+    private void notifySelectedSnippet(Snippet snippet) {
         for (IOverviewListener listener : mListeners) {
             listener.selectedSnippet(snippet);
+        }
+    }
+    
+    private void notifySelectedFilter(String filter) {
+        for (IOverviewListener listener : mListeners) {
+            listener.selectedFilter(filter);
+        }
+    }
+    
+    private void notifySelectedSort(SortType sort) {
+        for (IOverviewListener listener : mListeners) {
+            listener.selectedSort(sort);
         }
     }
     
@@ -460,5 +476,13 @@ public class SnippetsOverviewController {
      */
     public void selectSnippet(Snippet snippet) {
         mSnippetsTable.getSelectionModel().select(snippet);
+    }
+    
+    public void selectFilter(String filter) {
+        mFilterField.textProperty().set(filter);
+    }
+    
+    public void selectSort(SortType sort) {
+        mSortCombo.setValue(sort.getText());
     }
 }

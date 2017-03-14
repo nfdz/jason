@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
 import io.github.nfdz.jason.model.Snippet;
+import io.github.nfdz.jason.model.SortType;
 import io.github.nfdz.jason.model.serialization.JsonSerializer;
 import io.github.nfdz.jason.persistence.ISnippetsPersistence;
 import io.github.nfdz.jason.persistence.fs.FileSystemPersistence;
@@ -127,7 +128,7 @@ public class MainApp extends Application {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        viewLastSnippet(controller);
+                        resumeApp(controller);
                     }
                 });
             }
@@ -139,7 +140,22 @@ public class MainApp extends Application {
         });
     }
 
-    private void viewLastSnippet(SnippetsOverviewController controller) {
+    /**
+     * This method gets last information from preferences and try to resume as the user left it.
+     * @param controller
+     */
+    private void resumeApp(SnippetsOverviewController controller) {
+        // last selected filter
+        String filter = PreferencesUtils.getSelectedFilter();
+        if (filter == null) filter = "";
+        controller.selectFilter(filter);
+        
+        // last selected
+        SortType sort = PreferencesUtils.getSelectedSort();
+        if (sort == null) sort = SortType.NAME;
+        controller.selectSort(sort);
+        
+        // last selected snippet
         Snippet lastSelectedSnippet = null;
         int hashCode = PreferencesUtils.getSelectedSnippetHashCode();
         for (Snippet snippet : mRepository.getReadableList()) {
@@ -159,6 +175,16 @@ public class MainApp extends Application {
         @Override
         public void selectedSnippet(Snippet snippet) {
             PreferencesUtils.setSelectedSnippetHashCode(snippet != null ? snippet.hashCode() : -1);
+        }
+
+        @Override
+        public void selectedFilter(String filter) {
+            PreferencesUtils.setSelectedFilter(filter);
+        }
+
+        @Override
+        public void selectedSort(SortType sort) {
+            PreferencesUtils.setSelectedSort(sort);
         }
     }
 }

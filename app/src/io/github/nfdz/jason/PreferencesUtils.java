@@ -14,9 +14,13 @@ package io.github.nfdz.jason;
 
 import java.util.prefs.Preferences;
 
+import io.github.nfdz.jason.model.SortType;
+
 public class PreferencesUtils {
     
     private final static String OPENED_SNIPPET_KEY = "openedSnippet";
+    private final static String FILTER_TEXT_KEY = "filterText";
+    private final static String SORT_KEY = "sortBy";
 
     
     /**
@@ -40,6 +44,36 @@ public class PreferencesUtils {
             prefs.remove(OPENED_SNIPPET_KEY);
         } else {
             prefs.putInt(OPENED_SNIPPET_KEY, hashCode);
+        }
+    }
+
+    public static String getSelectedFilter() {
+        Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+        return prefs.get(FILTER_TEXT_KEY, "");
+    }
+    
+    public static void setSelectedFilter(String filter) {
+        Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+        if (filter == null || filter.isEmpty()) {
+            // there is no filter, clear last one
+            prefs.remove(FILTER_TEXT_KEY);
+        } else {
+            prefs.put(FILTER_TEXT_KEY, filter);
+        }
+    }
+
+    public static SortType getSelectedSort() {
+        Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+        return SortType.parseText(prefs.get(SORT_KEY, ""));
+    }
+    
+    public static void setSelectedSort(SortType sort) {
+        Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+        if (sort == null) {
+            // there is no sort, clear last one
+            prefs.remove(SORT_KEY);
+        } else {
+            prefs.put(SORT_KEY, sort.getText());
         }
     }
 }
