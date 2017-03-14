@@ -11,6 +11,11 @@ Desktop application to manage code snippets.
 
 ![Mockup](dev/mockup.png)
 
+## Current State
+
+![Jason Snippets](dev/jasonsnippets.png)
+![Snippet Dialog](dev/snippetdialog.png)
+
 ## Roadmap
 
 I will use sprints to determine the stages of development that I want to follow.

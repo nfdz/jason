@@ -40,7 +40,7 @@ public class FileSystemPersistence implements ISnippetsPersistence {
 
     private final static Logger LOGGER = Logger.getLogger(FileSystemPersistence.class.getName());
     
-    private final static String FILENAME_EXCEPTION = "Name must contains only these characters: \nA-Z, a-z, 0-9, -, _ and white spaces.";
+    private final static String FILENAME_EXCEPTION = "Name must contains only these characters: \nA-Z, a-z, 0-9, -, ., _ and white spaces.";
     private final static String SNIPPETS_FOLDER = "Snippets";
     private final static String SNIPPETS_EXTENSION = "jason";
 
@@ -95,6 +95,7 @@ public class FileSystemPersistence implements ISnippetsPersistence {
                 case '-':
                 case '_':
                 case ' ':
+                case '.':
                     continue;
             }
             if (l >= 'a' && l <= 'z') continue;
