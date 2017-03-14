@@ -164,16 +164,18 @@ public class SnippetDialogController {
         StringBuilder msg = new StringBuilder();
 
         if (mNameField.getText() == null || mNameField.getText().length() == 0) {
-            msg.append(" Name field can not be empty."); 
+            msg.append(" - Name field can not be empty."); 
         }
         
         // TODO set by configuration if this field is mandatory == not empty
         if (mLanguageField.getText() == null || mLanguageField.getText().length() == 0) {
-            msg.append(" Language field can not be empty."); 
+            if (msg.length() != 0) msg.append("\n");
+            msg.append(" - Language field can not be empty."); 
         }
         
         if (mCodeArea.getText() == null || mCodeArea.getText().length() == 0) {
-            msg.append(" Code text can not be empty."); 
+            if (msg.length() != 0) msg.append("\n");
+            msg.append(" - Code text can not be empty."); 
         }
 
         if (msg.length() == 0) {

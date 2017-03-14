@@ -12,6 +12,7 @@
  */
 package io.github.nfdz.jason;
 
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -62,9 +63,16 @@ public class SnippetsRepository {
             public void run() {
                 try {
                     mPersistence.initPersistence();
-                    mSnippetList.addAll(mPersistence.getSnippets());
-                    mPersistence.addListener(mListener);
-                    callback.notifySuccess();
+                    Set<Snippet> snippets = mPersistence.getSnippets();
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSnippetList.addAll(snippets);
+                            mPersistence.addListener(mListener);
+                            callback.notifySuccess();
+                        }
+                    });
                 } catch (PersistenceException e) {
                     callback.notifyFailure(e.getMessage());
                 }

@@ -10,24 +10,23 @@
  * Contributors:
  *     nfdz
  */
-package io.github.nfdz.jason.persistence;
+package io.github.nfdz.jason.model.serialization;
 
 /**
- * Custom exception for snippet persistence operations.
+ * Custom exception for snippet serialization operations.
  */
-public class PersistenceException extends Exception {
-
+public class SerializationException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public PersistenceException(String msg) {
+    public SerializationException(String msg) {
         super(msg);
     }
 
-    public PersistenceException(Throwable cause) {
+    public SerializationException(Throwable cause) {
         super(cause);
     }
     
-    public PersistenceException(String msg, Throwable cause) {
+    public SerializationException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }

@@ -18,8 +18,9 @@ import java.util.logging.Logger;
 
 import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
 import io.github.nfdz.jason.model.Snippet;
-import io.github.nfdz.jason.persistence.DummyPersistence;
+import io.github.nfdz.jason.model.serialization.JsonSerializer;
 import io.github.nfdz.jason.persistence.ISnippetsPersistence;
+import io.github.nfdz.jason.persistence.fs.FileSystemPersistence;
 import io.github.nfdz.jason.view.RootLayoutController;
 import io.github.nfdz.jason.view.SnippetsOverviewController;
 import io.github.nfdz.jason.view.SnippetsOverviewController.IOverviewListener;
@@ -79,8 +80,8 @@ public class MainApp extends Application {
     }
     
     private ISnippetsPersistence resolvePersistence() {
-        // TODO remove dummy implementation
-        return new DummyPersistence();
+        // TODO use persistence defined in preferences
+        return new FileSystemPersistence(new JsonSerializer());
     }
 
     private void initRootLayout() {
