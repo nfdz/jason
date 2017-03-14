@@ -12,7 +12,6 @@
  */
 package io.github.nfdz.jason.view;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -125,12 +124,11 @@ public class SnippetDialogController {
     @FXML
     private void handleFinish() {
         if (isInputValid()) {
-            LocalDate now = LocalDate.now();
             mSnippet = new Snippet(mNameField.getText(),
                     mLanguageField.getText(),
                     mCodeArea.getText(),
                     parseTags(mTagsField.getText()),
-                    now.toEpochDay());
+                    System.currentTimeMillis());
             mDialogStage.close();
         }
     }

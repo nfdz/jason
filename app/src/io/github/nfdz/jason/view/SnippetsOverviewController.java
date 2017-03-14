@@ -24,10 +24,17 @@ import io.github.nfdz.jason.MainApp;
 import io.github.nfdz.jason.SnippetsRepository;
 import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
 import io.github.nfdz.jason.model.Snippet;
+import io.github.nfdz.jason.model.SnippetDateComparator;
+import io.github.nfdz.jason.model.SnippetLanguageComparator;
+import io.github.nfdz.jason.model.SnippetNameComparator;
+import io.github.nfdz.jason.model.SortType;
 import io.github.nfdz.jason.view.SnippetDialogController.OpenMode;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -35,11 +42,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -69,6 +78,10 @@ public class SnippetsOverviewController {
     private final List<IOverviewListener> mListeners;
     
     private SnippetsRepository mRepository;
+    
+    private FilteredList<Snippet> mFilteredData;
+    
+    private SortedList<Snippet> mSortedData;
 
     @FXML
     private TableView<Snippet> mSnippetsTable;
@@ -97,6 +110,12 @@ public class SnippetsOverviewController {
     @FXML
     private Button mViewButton;
     
+    @FXML
+    private ComboBox<String> mSortCombo;
+    
+    @FXML
+    private TextField mFilterField;
+    
     public SnippetsOverviewController() {
         mListeners = new CopyOnWriteArrayList<>();
     }
@@ -111,6 +130,13 @@ public class SnippetsOverviewController {
             }
         });
         
+        // initialize sort combo
+        mSortCombo.getItems().addAll(
+                SortType.NAME.getText(),
+                SortType.LANGUAGE.getText(),
+                SortType.DATE.getText()
+        );
+                
         // clear snippet details
         showSnippetDetails(null);
 
@@ -119,7 +145,55 @@ public class SnippetsOverviewController {
                 (observable, oldValue, newValue) -> { showSnippetDetails(newValue); notifyListeners(newValue);}); 
         // clear selection when double click
         mSnippetsTable.setOnMouseClicked(
-                (e) -> { if(e.getClickCount() == 2) mSnippetsTable.getSelectionModel().select(null); });
+                (e) -> { if(e.getClickCount() == 2) mSnippetsTable.getSelectionModel().select(null); });  
+        
+        // add listener of filter text field
+        mFilterField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (mFilteredData != null) {
+                mFilteredData.setPredicate(snippet -> {
+                    // if filter text is empty, display all snippets
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+
+                    // TODO take from preferences the fields to match with filter
+                    
+                    // compare name, language and tags with filter text
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (snippet.getName().toLowerCase().contains(lowerCaseFilter)) return true; // filter matches name
+                    if (snippet.getLanguage().toLowerCase().contains(lowerCaseFilter)) return true; // filter matches language
+                    
+                    for (String tag : snippet.getTags()) {
+                        if (tag.toLowerCase().contains(lowerCaseFilter)) return true; // filter matches this tag
+                    }
+                    return false; // does not match
+                });
+            }
+        });
+        
+        // add listener of sort combo box
+        mSortCombo.valueProperty().addListener(new ChangeListener<String>() {
+            @Override 
+            public void changed(@SuppressWarnings("rawtypes") ObservableValue ov, String t, String t1) {
+                if (mSortedData != null) {
+                    SortType sort = SortType.parseText(t1);
+                    switch (sort) {
+                        case NAME:
+                            mSortedData.setComparator(new SnippetNameComparator());
+                            break;
+                        case LANGUAGE:
+                            mSortedData.setComparator(new SnippetLanguageComparator());
+                            break;
+                        case DATE:
+                            mSortedData.setComparator(new SnippetDateComparator());
+                            break;
+                        default:
+                            
+                    }
+                }
+            }    
+        });
     }
     
     /**
@@ -128,7 +202,9 @@ public class SnippetsOverviewController {
      */
     public void setRepository(SnippetsRepository repository) {
         mRepository = repository;
-        mSnippetsTable.setItems(mRepository.getReadableList());
+        mFilteredData = new FilteredList<>(mRepository.getReadableList(), s -> true);
+        mSortedData = new SortedList<>(mFilteredData);
+        mSnippetsTable.setItems(mSortedData);
     }
     
     /**
