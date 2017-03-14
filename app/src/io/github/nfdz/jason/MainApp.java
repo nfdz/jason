@@ -17,8 +17,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
+import io.github.nfdz.jason.model.Filter;
 import io.github.nfdz.jason.model.Snippet;
 import io.github.nfdz.jason.model.SortType;
+import io.github.nfdz.jason.model.Filter.FilterType;
 import io.github.nfdz.jason.model.serialization.JsonSerializer;
 import io.github.nfdz.jason.persistence.ISnippetsPersistence;
 import io.github.nfdz.jason.persistence.fs.FileSystemPersistence;
@@ -146,8 +148,8 @@ public class MainApp extends Application {
      */
     private void resumeApp(SnippetsOverviewController controller) {
         // last selected filter
-        String filter = PreferencesUtils.getSelectedFilter();
-        if (filter == null) filter = "";
+        Filter filter = PreferencesUtils.getSelectedFilter();
+        if (filter == null) filter = new Filter("", FilterType.NAME);
         controller.selectFilter(filter);
         
         // last selected
@@ -178,7 +180,7 @@ public class MainApp extends Application {
         }
 
         @Override
-        public void selectedFilter(String filter) {
+        public void selectedFilter(Filter filter) {
             PreferencesUtils.setSelectedFilter(filter);
         }
 

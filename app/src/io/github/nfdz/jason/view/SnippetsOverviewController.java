@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 import io.github.nfdz.jason.MainApp;
 import io.github.nfdz.jason.SnippetsRepository;
 import io.github.nfdz.jason.SnippetsRepository.IOperationCallback;
+import io.github.nfdz.jason.model.Filter;
+import io.github.nfdz.jason.model.Filter.FilterType;
 import io.github.nfdz.jason.model.Snippet;
 import io.github.nfdz.jason.model.SnippetDateComparator;
 import io.github.nfdz.jason.model.SnippetLanguageComparator;
@@ -62,7 +64,7 @@ public class SnippetsOverviewController {
     /** Interface of a listener that wants to know what snippet is showing */
     public static interface IOverviewListener {
         void selectedSnippet(Snippet snippet);
-        void selectedFilter(String filter);
+        void selectedFilter(Filter filter);
         void selectedSort(SortType sort);
     }
     
@@ -84,6 +86,8 @@ public class SnippetsOverviewController {
     private FilteredList<Snippet> mFilteredData;
     
     private SortedList<Snippet> mSortedData;
+    
+    private FilterType mFilterType;
 
     @FXML
     private TableView<Snippet> mSnippetsTable;
@@ -114,9 +118,12 @@ public class SnippetsOverviewController {
     
     @FXML
     private ComboBox<String> mSortCombo;
-    
+
     @FXML
     private TextField mFilterField;
+    
+    @FXML
+    private ComboBox<String> mFilterCombo;
     
     public SnippetsOverviewController() {
         mListeners = new CopyOnWriteArrayList<>();
@@ -138,6 +145,13 @@ public class SnippetsOverviewController {
                 SortType.LANGUAGE.getText(),
                 SortType.DATE.getText()
         );
+        
+        // initialize filter combo
+        mFilterCombo.getItems().addAll(
+                FilterType.NAME.getText(),
+                FilterType.LANGUAGE.getText(),
+                FilterType.TAGS.getText()                
+        );
                 
         // clear snippet details
         showSnippetDetails(null);
@@ -152,35 +166,30 @@ public class SnippetsOverviewController {
         // add listener of filter text field
         mFilterField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (mFilteredData != null) {
-                mFilteredData.setPredicate(snippet -> {
-                    // if filter text is empty, display all snippets
-                    if (newValue == null || newValue.isEmpty()) {
-                        return true;
+                updateFilter(new Filter(newValue, mFilterType));
+            }
+        });
+        
+        // add listener of filter combo box
+        mFilterCombo.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
+                if (mFilteredData != null) {
+                    FilterType filter = FilterType.parseText(newValue);
+                    if (filter != mFilterType) {
+                        mFilterType = filter;
+                        updateFilter(new Filter(mFilterField.getText(), mFilterType));
                     }
-
-                    // TODO take from preferences the fields to match with filter
-                    
-                    // compare name, language and tags with filter text
-                    String lowerCaseFilter = newValue.toLowerCase();
-
-                    if (snippet.getName().toLowerCase().contains(lowerCaseFilter)) return true; // filter matches name
-                    if (snippet.getLanguage().toLowerCase().contains(lowerCaseFilter)) return true; // filter matches language
-                    
-                    for (String tag : snippet.getTags()) {
-                        if (tag.toLowerCase().contains(lowerCaseFilter)) return true; // filter matches this tag
-                    }
-                    return false; // does not match
-                });
-                notifySelectedFilter(newValue);
+                }
             }
         });
         
         // add listener of sort combo box
         mSortCombo.valueProperty().addListener(new ChangeListener<String>() {
             @Override 
-            public void changed(@SuppressWarnings("rawtypes") ObservableValue ov, String t, String t1) {
+            public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
                 if (mSortedData != null) {
-                    SortType sort = SortType.parseText(t1);
+                    SortType sort = SortType.parseText(newValue);
                     switch (sort) {
                         case NAME:
                             mSortedData.setComparator(new SnippetNameComparator());
@@ -198,6 +207,33 @@ public class SnippetsOverviewController {
                 }
             }    
         });
+        
+    }
+    
+    private void updateFilter(Filter filter) {
+        mFilteredData.setPredicate(snippet -> {
+            // if filter is empty, display all snippets
+            if (filter == null || 
+                filter.getText() == null ||
+                filter.getText().isEmpty() ||
+                filter.getType() == null) {
+                return true;
+            }
+            
+            // compare name, language and tags with filter text
+            String lowerCaseFilter = filter.getText().toLowerCase();
+
+            switch(filter.getType()) {
+                case NAME: return snippet.getName().toLowerCase().contains(lowerCaseFilter);
+                case LANGUAGE: return snippet.getLanguage().toLowerCase().contains(lowerCaseFilter);
+                case TAGS:
+                    for (String tag : snippet.getTags()) {
+                        if (tag.toLowerCase().contains(lowerCaseFilter)) return true; // filter matches this tag
+                    }
+            }
+            return false; // does not match
+        });
+        notifySelectedFilter(filter);
     }
     
     /**
@@ -449,7 +485,7 @@ public class SnippetsOverviewController {
         }
     }
     
-    private void notifySelectedFilter(String filter) {
+    private void notifySelectedFilter(Filter filter) {
         for (IOverviewListener listener : mListeners) {
             listener.selectedFilter(filter);
         }
@@ -478,8 +514,9 @@ public class SnippetsOverviewController {
         mSnippetsTable.getSelectionModel().select(snippet);
     }
     
-    public void selectFilter(String filter) {
-        mFilterField.textProperty().set(filter);
+    public void selectFilter(Filter filter) {
+        mFilterField.textProperty().set(filter.getText());
+        mFilterCombo.setValue(filter.getType().getText());
     }
     
     public void selectSort(SortType sort) {
