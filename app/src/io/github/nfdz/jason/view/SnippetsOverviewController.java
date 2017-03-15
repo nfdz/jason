@@ -12,10 +12,15 @@
  */
 package io.github.nfdz.jason.view;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -389,10 +394,75 @@ public class SnippetsOverviewController {
         }
     }
     
+    /**
+     * Create a temporary file that contents the code of the given snippet. 
+     * @param snippet
+     * @return path to file
+     * @throws IOException
+     */
+    private static String createSnippetCodeTempFile(Snippet snippet) throws IOException {
+        String extension = "." + snippet.getLanguage().toLowerCase();
+        Path path = Files.createTempFile(UUID.randomUUID().toString(), extension);
+        Files.write(path, snippet.getCode().getBytes(StandardCharsets.UTF_8));
+        File file = path.toFile();
+        file.deleteOnExit();
+        return file.getAbsolutePath();
+    }    
 
     @FXML
     private void handleViewSnippet() {
-        // TODO implement this
+        int selectedIndex = mSnippetsTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex < 0) return;
+        Snippet snippet = mSnippetsTable.getItems().get(selectedIndex);
+
+        // create temp file with snippet
+        String pathTempFile;
+        try {
+            pathTempFile = createSnippetCodeTempFile(snippet);
+        } catch (IOException e1) {
+            LOGGER.log(Level.WARNING, "Can not create a temp file with snippet code.", e1);
+            return;
+        }
+
+        // try to open sublime
+        try{
+            new ProcessBuilder("sublime", pathTempFile).start();
+            return;
+        } catch (IOException  e) {
+            LOGGER.log(Level.FINE, "Can not open sublime text editor.", e);
+        }
+        
+        // try to open atom
+        try{
+            new ProcessBuilder("atom", pathTempFile).start();
+            return;
+        } catch (IOException  e) {
+            LOGGER.log(Level.FINE, "Can not open atom editor.", e);
+        }
+        
+        // open default built-in snippet dialog
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("SnippetDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+    
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(MainApp.APP_TITLE + " - View Snippet");
+            dialogStage.setMinHeight(page.getMinHeight());
+            dialogStage.setMinWidth(page.getMinWidth());
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(mViewButton.getScene().getWindow());
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+    
+            SnippetDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setOpenMode(OpenMode.VISUALIZATION);
+            controller.setSnippet(snippet);
+            dialogStage.showAndWait();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Can not open view snippet dialog layout file.", e);
+        }
     }
 
     /**

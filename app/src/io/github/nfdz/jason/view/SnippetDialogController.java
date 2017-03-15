@@ -32,7 +32,7 @@ import javafx.stage.Stage;
 public class SnippetDialogController {
     
     /** This is the flag used to know what kind of dialog it is */
-    public static enum OpenMode { CREATION, EDITION };
+    public static enum OpenMode { CREATION, EDITION, VISUALIZATION };
     
     /** Tag separator expected and used to show tag list */ 
     private final static String TAG_SEPARATOR = ";";
@@ -48,9 +48,12 @@ public class SnippetDialogController {
     
     @FXML
     private TextArea mCodeArea;
-    
+
     @FXML
     private Button mFinishButton;
+    
+    @FXML
+    private Button mCancelButton;
     
     private Stage mDialogStage;
     
@@ -82,6 +85,14 @@ public class SnippetDialogController {
             case EDITION:
                 mFinishButton.setText("Edit");
                 break;
+            case VISUALIZATION:
+                mFinishButton.setText("Close");
+                mCancelButton.setVisible(false);
+                mNameField.setEditable(false);
+                mLanguageField.setEditable(false);
+                mTagsField.setEditable(false);
+                mCodeArea.setEditable(false);
+                
         }
     }
     
@@ -123,7 +134,10 @@ public class SnippetDialogController {
     
     @FXML
     private void handleFinish() {
-        if (isInputValid()) {
+        // if cancel button is not visible, it is not creating a snippet
+        if (!mCancelButton.isVisible()) {
+            mDialogStage.close();
+        } else if (isInputValid()) {
             mSnippet = new Snippet(mNameField.getText(),
                     mLanguageField.getText(),
                     mCodeArea.getText(),

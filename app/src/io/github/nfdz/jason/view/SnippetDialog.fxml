@@ -66,7 +66,7 @@
             </TextArea>
             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <children>
-                  <Button maxWidth="80.0" minWidth="80.0" mnemonicParsing="false" onAction="#handleCancel" prefWidth="80.0" text="Cancel">
+                  <Button fx:id="mCancelButton" maxWidth="80.0" minWidth="80.0" mnemonicParsing="false" onAction="#handleCancel" prefWidth="80.0" text="Cancel">
                      <HBox.margin>
                         <Insets right="5.0" />
                      </HBox.margin>
