@@ -409,6 +409,10 @@ public class SnippetsOverviewController {
         return file.getAbsolutePath();
     }    
 
+    /**
+     * TODO This method should use information from user preferences to determinate 
+     * code editor application.
+     */
     @FXML
     private void handleViewSnippet() {
         int selectedIndex = mSnippetsTable.getSelectionModel().getSelectedIndex();
