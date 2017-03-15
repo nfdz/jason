@@ -32,7 +32,8 @@ I will use sprints to determine the stages of development that I want to follow.
 * ~~**Sprint 4**: Implement search system (name, language and tag based).~~
 * **Sprint 5**: Implement configuration/user preferences.
 * **Sprint 6**: Create an extensible persistence system (connectors approach).
-* **Sprint 7**: Implement other features (snippet multi-tabs, font resize, themes, etc).
+* **Sprint 7**: Implement other features (snippet multi-file-tabs, font resize, copy to clipboard, themes, etc).
+* **Sprint 8**: Create useful connectors (github gist, google drive, etc).
 
 ## Setup
 

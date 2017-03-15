@@ -36,8 +36,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-// TODO Persistence: google drive and github.
-
 /**
  * Main application class.
  */
