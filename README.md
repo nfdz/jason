@@ -7,19 +7,25 @@
 
 Desktop application to manage code snippets.
 
+## Download
+
+<p align="center"><a href="https://github.com/nfdz/jason/releases">
+  <img width="250" src="dev/githubBadge.png?raw=true" alt="Get it on Github"/>
+</a></p>
+
 ## Mockup
 
 <p align="center">
-  <img src="dev/mockup.png?raw=true" alt="Mockup"/>
+  <img width="500" src="dev/mockup.png?raw=true" alt="Mockup"/>
 </p>
 
 ## Current State
 
 <p align="center">
-  <img src="dev/jasonsnippets.png?raw=true" alt="Jason Snippets"/>
+  <img width="500" src="dev/jasonsnippets.png?raw=true" alt="Jason Snippets"/>
 </p>
 <p align="center">
-  <img src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
+  <img width="400" src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
 </p>
 
 ## Roadmap
@@ -58,3 +64,4 @@ TODO: edit
 ## License
 
 [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.en.html "GNU General Public License v3")
+Github and the Github logo are trademarks of Github Inc.
