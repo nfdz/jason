@@ -4,7 +4,7 @@
 # JasonSnippets
 
 <p align="center">
-  <img width="350 src="dev/logo.png?raw=true" alt="Jason Snippets"/>
+  <img width="350" src="dev/logo.png?raw=true" alt="Jason Snippets"/>
 </p>
 
 
@@ -28,7 +28,7 @@ Desktop application to manage code snippets.
   <img width="500" src="dev/jasonsnippets.png?raw=true" alt="Jason Snippets"/>
 </p>
 <p align="center">
-  <img width="350" src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
+  <img width="250" src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
 </p>
 
 ## Roadmap
