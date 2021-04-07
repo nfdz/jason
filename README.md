@@ -4,7 +4,7 @@
 # JasonSnippets
 
 <p align="center">
-  <img src="dev/logo.png?raw=true" alt="Jason Snippets"/>
+  <img width="350 src="dev/logo.png?raw=true" alt="Jason Snippets"/>
 </p>
 
 
@@ -13,7 +13,7 @@ Desktop application to manage code snippets.
 ## Download
 
 <p align="center"><a href="https://github.com/nfdz/jason/releases">
-  <img width="150" src="dev/githubBadge.png?raw=true" alt="Get it on Github"/>
+  <img width="250" src="dev/githubBadge.png?raw=true" alt="Get it on Github"/>
 </a></p>
 
 ## Mockup
@@ -28,17 +28,17 @@ Desktop application to manage code snippets.
   <img width="500" src="dev/jasonsnippets.png?raw=true" alt="Jason Snippets"/>
 </p>
 <p align="center">
-  <img width="400" src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
+  <img width="350" src="dev/snippetdialog.png?raw=true" alt="Snippet Dialog"/>
 </p>
 
 ## Roadmap
 
 I will use sprints to determine the stages of development that I want to follow.
 
-* Create data model, interfaces and mockup UI.~~
-* Develop the presentation of the application until it is usable.~~
-* Create complete data model. Add tagging system.~~
-* Implement search system (name, language and tag based).~~
+* Create data model, interfaces and mockup UI.
+* Develop the presentation of the application until it is usable.
+* Create complete data model. Add tagging system.
+* Implement search system (name, language and tag based).
 * Implement configuration/user preferences.
 
 ## Setup
